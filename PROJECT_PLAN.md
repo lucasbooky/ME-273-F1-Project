@@ -59,6 +59,11 @@ ME 273 F1 Project/
 - Weather, race control messages, team radio
 - Championship standings
 
+Full endpoint-by-endpoint detail (what each one returns, how often, key columns)
+lives in `f1/fetch.py` as `endpoint_reference()` — call it to get a DataFrame
+of all 18 OpenF1 endpoints instead of re-deriving this from the API docs each
+time. Demoed in `test.ipynb`.
+
 ## 4. What the Program Should Do
 
 1. **Fetch and store** telemetry and timing data for selected race sessions via the OpenF1 API.
