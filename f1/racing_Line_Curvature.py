@@ -51,9 +51,14 @@ def calculate_curvature(session_key, driver_number):
     return location_Data_XY 
 
 
-def identify_corners(curvature):
-    # Identify sections of high curvature
-    pass
+def identify_corners(curvature_data, curvature_threshold=0.01):
+    """Identifies corners in the curvature data based on a curvature threshold. Returns a list of corner indices."""
+    # Need to identify curvature threshold to identify corners, need to look at data to find a good threshold, maybe 0.01 is a good starting point.
+    
+    # Return a boolean column indicating whether each point is part of a corner based on the curvature threshold
+    curvature_data["corner"] = (curvature_data["curvature"] >= curvature_threshold)
+
+    return curvature_data
 
 def find_apex(corner, x, y):
     # Find the approximate apex of a corner
