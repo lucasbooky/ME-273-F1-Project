@@ -29,6 +29,54 @@ def get_cached(name, endpoint, **params):
     return df
 
 
+# One row per OpenF1 endpoint: what it covers, how often rows show up, and the
+# columns worth knowing about. Kept as a list of dicts (like a little spreadsheet)
+# so endpoint_reference() can turn it into a DataFrame.
+ENDPOINTS = [
+    {"endpoint": "sessions",             "granularity": "1 row per session (practice/quali/race)",
+     "key_fields": "session_name, session_type, date_start/end, circuit_short_name, year"},
+    {"endpoint": "meetings",             "granularity": "1 row per Grand Prix weekend",
+     "key_fields": "meeting_name, country_name, circuit_key, year"},
+    {"endpoint": "drivers",              "granularity": "1 row per driver per session",
+     "key_fields": "full_name, name_acronym, team_name, team_colour, headshot_url"},
+    {"endpoint": "laps",                 "granularity": "1 row per driver per lap",
+     "key_fields": "lap_number, lap_duration, duration_sector_1/2/3, i1_speed, i2_speed, st_speed, is_pit_out_lap"},
+    {"endpoint": "car_data",             "granularity": "~3.7 Hz telemetry samples",
+     "key_fields": "speed, throttle, brake, n_gear, rpm, drs"},
+    {"endpoint": "location",             "granularity": "~3.7 Hz",
+     "key_fields": "x, y, z (track-position coordinates)"},
+    {"endpoint": "position",             "granularity": "1 row per position change",
+     "key_fields": "position, date"},
+    {"endpoint": "intervals",            "granularity": "~every 4s, race only",
+     "key_fields": "gap_to_leader, interval (gap to car ahead)"},
+    {"endpoint": "stints",               "granularity": "1 row per tyre stint",
+     "key_fields": "compound, lap_start, lap_end, tyre_age_at_start"},
+    {"endpoint": "pit",                  "granularity": "1 row per pit stop",
+     "key_fields": "lap_number, lane_duration, stop_duration"},
+    {"endpoint": "weather",              "granularity": "~every 1 min",
+     "key_fields": "air_temperature, track_temperature, humidity, rainfall, wind_speed"},
+    {"endpoint": "race_control",         "granularity": "1 row per event",
+     "key_fields": "category, flag, message, scope, lap_number"},
+    {"endpoint": "team_radio",           "granularity": "1 row per radio clip",
+     "key_fields": "recording_url (mp3)"},
+    {"endpoint": "starting_grid",        "granularity": "1 row per driver, pre-race",
+     "key_fields": "position (grid slot), lap_duration (quali time that set it)"},
+    {"endpoint": "session_result",       "granularity": "1 row per driver, post-session",
+     "key_fields": "position, duration, gap_to_leader, dnf/dns/dsq"},
+    {"endpoint": "overtakes",            "granularity": "1 row per pass, race only (may be incomplete)",
+     "key_fields": "overtaking_driver_number, overtaken_driver_number, position"},
+    {"endpoint": "championship_drivers", "granularity": "1 row per driver, race sessions only (beta)",
+     "key_fields": "points_start/current, position_start/current"},
+    {"endpoint": "championship_teams",   "granularity": "1 row per team, race sessions only (beta)",
+     "key_fields": "team_name, points_start/current, position_start/current"},
+]
+
+
+def endpoint_reference():
+    """A table of every OpenF1 endpoint with what it returns, for quick lookup."""
+    return pd.DataFrame(ENDPOINTS)
+
+
 def top_drivers(year, n=5):
     """The n drivers highest in the final championship standings of `year`."""
     races = get("sessions", year=year, session_name="Race")
